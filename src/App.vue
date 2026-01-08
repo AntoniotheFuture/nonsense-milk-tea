@@ -1,30 +1,18 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from 'vue'
+import Loading from './views/Loading.vue'
+import Login from './views/Login.vue'
+
+// 页面状态（模拟路由，不保存登录态）
+const currentPage = ref('Loading')
+const showAd = ref(true) // 强制广告
+const showErrorModal = ref(false) // 关不掉的错误弹窗
 </script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
-  </div>
-  <HelloWorld msg="Vite + Vue" />
+  <!-- 页面切换 -->
+  <component :is="currentPage"
+    @loadDone="currentPage = 'Home'"
+    @gotoLogin="currentPage = 'Login'"
+  />
 </template>
-
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>

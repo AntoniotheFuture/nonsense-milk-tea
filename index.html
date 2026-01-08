@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -9,5 +9,14 @@
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.js"></script>
+    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+    <script>
+      // 初始化vConsole
+      var vConsole = new window.VConsole();
+      
+      // 测试日志输出
+      console.log('页面加载完成');
+      console.log('当前时间:', new Date().toLocaleString());
+    </script>
   </body>
 </html>
