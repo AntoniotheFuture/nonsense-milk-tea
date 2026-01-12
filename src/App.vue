@@ -1,18 +1,35 @@
 <script setup>
-import { ref } from 'vue'
-import Loading from './views/Loading.vue'
+import { ref, computed } from 'vue'
+import Index from './views/Index.vue'
 import Login from './views/Login.vue'
 
-// 页面状态（模拟路由，不保存登录态）
-const currentPage = ref('Loading')
-const showAd = ref(true) // 强制广告
-const showErrorModal = ref(false) // 关不掉的错误弹窗
+const routes = {
+  '/': {
+    component: Index,
+    title: '五彩珍珠',
+  },
+  '/login': {
+    component: Login,
+    title: '用户登录',
+  },
+  '/order-detail': {
+    component: () => import('./views/OrderDetail.vue'),
+    title: '订单详情',
+  },
+}
+
+const currentPath = ref(window.location.hash)
+window.addEventListener('hashchange', () => {
+  currentPath.value = window.location.hash
+  document.title = routes[currentPath.value.slice(1) || '/']?.title || '五彩珍珠'
+})
+
+const currentView = computed(() => {
+  return routes[currentPath.value.slice(1) || '/']?.component || Index
+})
 </script>
 
 <template>
   <!-- 页面切换 -->
-  <component :is="currentPage"
-    @loadDone="currentPage = 'Home'"
-    @gotoLogin="currentPage = 'Login'"
-  />
+  <component :is="currentView" />
 </template>

@@ -1,8 +1,10 @@
 <script setup>
 // 点单界面
 import { useTemplateRef, ref } from 'vue'
-import { ElLoading, ElMessage } from 'element-plus'
 import ProductClassification from '../components/ProductClassification.vue';
+import ProductItem from '../components/ProductItem.vue';
+
+defineEmits(['pickItem']);
 
 import { state } from '../store/state.js'
 
@@ -87,33 +89,31 @@ const onRightMenuScroll = () => {
     }
 };
 
-const loadMenuByOrderTypeAndStore = () => {
-    // 根据订单类型和门店加载不同的菜单
-    // 这里可以添加实际的加载逻辑
+const pickItem = (item) => {
+    emit('pickItem', item);
 };
 
 </script>
 
 <template>
-  <div class="order-page">
-    <!-- 配送类型选择器 -->
-    <div class="order-type-selector">
-        <el-link :type="state.orderType === 'selfPickUp' ? 'primary' : ''" @click="state.orderType = 'selfPickUp'">到店自取</el-link>
-        <el-link :type="state.orderType === 'deliveryOrder' ? 'primary' : ''" @click="state.orderType = 'deliveryOrder'">外卖配送</el-link>
+    <!-- 商品菜单区域 -->
+    <div class="menu-area">
+        <!-- 左侧大类滚动区 -->
+        <div class="left-menu">
+            <div v-for="value in classificationList" :key="value" @click="selectClassification(value)">
+                <product-classification :label="value" :isActive="classification === value" />
+            </div>
+        </div>
+        <!-- 右侧商品展示区 -->
+        <div class="right-menu" @scroll="onRightMenuScroll">
+            <div v-for="item in productList" :key="item.classification" :data-classification="item.classification">
+                <div class="classificationName">{{ item.name }}</div>
+                <div class="product-list">
+                    <div v-for="product in item.list" :key="product.id">
+                        <product-item :productInfo="product" @click="pickItem(product)" />
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <template v-if="state.orderType === 'selfPickUp'">
-        <div class="store-info">
-          <el-icon><i class="el-icon-location"></i></el-icon>
-          <span>您最近的门店：南山区深南大道10000号（1.2km）</span>
-        </div>
-        <Menu />
-    </template>
-    <template v-else>
-        <div class="delivery-info">
-          <el-icon><i class="el-icon-location"></i></el-icon>
-          <span>配送地址：南山区深南大道10000号</span>
-        </div>
-        <Menu />
-    </template>
-  </div>
 </template>

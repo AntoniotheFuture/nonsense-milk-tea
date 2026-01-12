@@ -1,5 +1,5 @@
 <template>
-  <div class="nav-button" :class="{ active: active }">
+  <div class="nav-button" :class="{ active: active }" @click="emit('click')">
     <el-icon :size="20" :color="color">
       <slot name="el-icon"></slot>
     </el-icon>
@@ -8,7 +8,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
 const emit = defineEmits(['adEnd'])
 
 defineProps({

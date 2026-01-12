@@ -1,19 +1,16 @@
 <script setup>
-    defineEmits(['addToCart'])
-    // 商品列表卡片
-    defineProps({
-        productInfo: {
-            type: Object,
-            required: true
-        },
-    })
+defineEmits(['pickItem'])
+// 商品列表卡片
+defineProps({
+    productInfo: {
+        type: Object,
+        required: true
+    },
+})
 
-    const clickItem = () => {
-        $emit('clickItem', productInfo)
-    }
-    const add2Cart = () => {
-        $emit('addToCart', productInfo)
-    }
+const clickItem = () => {
+    $emit('pickItem')
+}
 </script>
 
 <template>
@@ -25,7 +22,7 @@
             <div class="price">￥{{ productInfo.price.toFixed(2) }}</div>
         </div>
         <div class="actions">
-            <el-button type="primary" icon="el-icon-plus" circle @click="add2Cart"></el-button>
+            <el-button type="primary" icon="el-icon-plus" circle @click="clickItem"></el-button>
         </div>  
     </div>
 </template>

@@ -30,7 +30,6 @@
 import { useTemplateRef, ref } from 'vue'
 import { ElLoading, ElMessage } from 'element-plus'
 import { state } from '../store/state.js'
-import { fa } from 'element-plus/es/locales.mjs'
 const emit = defineEmits(['showError', 'goToHome'])
 
 const loginFormRef = useTemplateRef('loginFormRef')
@@ -78,7 +77,7 @@ const registerRules = reactive < FormRules < RuleForm >> ({
 // 校验表单并提交登陆
 const submitLogin = () => {
     if (!loginFormRef) return
-    await loginFormRef.validate((valid, fields) => {
+    loginFormRef.validate((valid, fields) => {
         if (valid) {
             login()
         } else {
@@ -94,7 +93,7 @@ const submitLogin = () => {
 
 const submitRegister = () => {
     if (!registerFormRef) return
-    await registerFormRef.validate((valid, fields) => {
+    registerFormRef.validate((valid, fields) => {
         if (valid) {
             register()
         } else {
@@ -160,40 +159,3 @@ const register = () => {
     }, 500)
 }
 </script>
-
-<i18n>
-{
-  "en": {
-    "system_name": "Nonsense Milk Tea Ordering System V1.0 (Practice Edition)",
-    "username": "Username", 
-    "login": "Login",
-    "register": "Register",
-    "password": "Password",
-    "password_placeholder": "Enter a 20-character password",
-    "password_length_error": "Password must be exactly 20 characters long.",
-    "username_required": "Username is required.",
-    "username_length_error": "Username length must be between 4 and 20 characters.",
-    "logging_in": "Logging in...",
-    "user_not_exist_or_password_error": "User does not exist or password is incorrect.",
-    "registering": "Registering...",
-    "register_success": "Registration successful! You can now log in.",
-    "back2Login": "Back to Login"
-  },
-  "zh": {
-    "system_name": "奶茶点单系统 V1.0（练手版）",
-    "username": "用户名",
-    "login": "登录",
-    "register": "注册"
-    "password": "密码",
-    "password_placeholder": "请输入20位密码",
-    "password_length_error": "密码长度必须为20位。",
-    "username_required": "用户名为必填项。",
-    "username_length_error": "用户名长度必须在4到20位之间。",
-    "logging_in": "正在登录...",
-    "user_not_exist_or_password_error": "用户不存在或密码错误。",
-    "registering": "正在注册...",
-    "register_success": "注册成功！现在您可以登录了。",
-    "back2Login": "返回登录"
-  }
-}
-</i18n>
