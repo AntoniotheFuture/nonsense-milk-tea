@@ -2,6 +2,9 @@
 import { ref, computed } from 'vue'
 import Index from './views/Index.vue'
 import Login from './views/Login.vue'
+import OrderConfirm from './views/OrderConfirm.vue'
+import Payment from './views/Payment.vue'
+import OrderDetails from './views/OrderDetails.vue'
 
 const routes = {
   '/': {
@@ -12,8 +15,16 @@ const routes = {
     component: Login,
     title: '用户登录',
   },
-  '/order-detail': {
-    component: () => import('./views/OrderDetail.vue'),
+  '/order-confirm': {
+    component: OrderConfirm,
+    title: '订单确认',
+  },
+  '/payment': {
+    component: Payment,
+    title: '付款成功',
+  },
+  '/order-details': {
+    component: OrderDetails,
     title: '订单详情',
   },
 }

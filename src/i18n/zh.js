@@ -6,7 +6,7 @@ export default {
     "register": "注册",
     "password": "密码",
     "password_placeholder": "请输入20位密码",
-    "password_length_error": "密码长度必须为20位。",
+    "password_length_error": "密码长度必须至少为25位。",
     "username_required": "用户名为必填项。",
     "username_length_error": "用户名长度必须在4到20位之间。",
     "logging_in": "正在登录...",

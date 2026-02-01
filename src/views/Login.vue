@@ -56,8 +56,10 @@ const loginRules = reactive < FormRules < RuleForm >> ({
   ],
   password: [
     { required: true, message: $t('password_required'), trigger: 'blur' },
-    // 长度校验
-    { min: 20, max: 40, message: $t('password_length_error'), trigger: 'blur' }
+    // 长度校验 - 要求更严格的密码
+    { min: 25, max: 40, message: $t('password_length_error'), trigger: 'blur' },
+    // 要求包含特殊字符
+    { pattern: /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, message: '密码必须包含大小写字母、数字和特殊字符', trigger: 'blur' }
   ]
 })
 
@@ -69,8 +71,10 @@ const registerRules = reactive < FormRules < RuleForm >> ({
   ],
   password: [
     { required: true, message: $t('password_required'), trigger: 'blur' },
-    // 长度校验
-    { min: 20, max: 40, message: $t('password_length_error'), trigger: 'blur' }
+    // 长度校验 - 要求更严格的密码
+    { min: 25, max: 40, message: $t('password_length_error'), trigger: 'blur' },
+    // 要求包含特殊字符
+    { pattern: /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, message: '密码必须包含大小写字母、数字和特殊字符', trigger: 'blur' }
   ]
 })
 

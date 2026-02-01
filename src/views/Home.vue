@@ -1,7 +1,53 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { ElMessageBox } from 'element-plus'
 import { state } from '../store/state.js'
 const emit = defineEmits(['goToOrder'])
+
+// 添加随机错误弹窗
+const errorMessages = [
+  '网络连接异常，请检查网络设置',
+  '系统繁忙，请稍后再试',
+  '数据库连接失败',
+  '权限验证失败',
+  '未知错误，请联系管理员'
+]
+
+let errorTimer = null
+
+onMounted(() => {
+  // 随机错误弹窗，小概率出现
+  errorTimer = setInterval(() => {
+    if (Math.random() < 0.01) { // 1% 概率
+      const randomError = errorMessages[Math.floor(Math.random() * errorMessages.length)]
+      ElMessageBox.alert(randomError, '系统错误', {
+        confirmButtonText: '确定',
+        callback: () => {
+          // 即使用户点击确定，也可能继续出现错误
+          if (Math.random() < 0.3) { // 30% 概率继续弹窗
+            setTimeout(() => {
+              const anotherError = errorMessages[Math.floor(Math.random() * errorMessages.length)]
+              ElMessageBox.alert(anotherError, '系统错误', {
+                confirmButtonText: '确定'
+              })
+            }, 1000)
+          }
+        }
+      })
+    }
+  }, 5000) // 每5秒检查一次
+})
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  if (errorTimer) {
+    clearInterval(errorTimer)
+  }
+})
+
+const gotoUser = () => {
+    emit('goToUser')
+}
 
 const selfPickUp = () => {
    state.orderType = 'selfPickUp'
@@ -12,13 +58,15 @@ const deliveryOrder = () => {
     state.orderType = 'deliveryOrder'
     emit('goToOrder')
 }
+
+
 </script>
 
 <template>
     <div class="home">
         <!-- 顶部用户头像和欢迎语 -->
         <div class="userWelcome">
-            <el-avatar :size="40" icon="el-icon-user-solid"></el-avatar>
+            <el-avatar :size="40" icon="el-icon-user-solid" @click="gotoUser"></el-avatar>
             <span>
                 欢迎，
                 <el-link v-if="!state.isLogin" type="primary" href="#/login">{{ $t('goLogin') }}</el-link>
