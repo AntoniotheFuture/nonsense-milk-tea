@@ -80,13 +80,13 @@ onMounted(() => {
 // 查看订单详情
 const viewOrderDetails = () => {
   // 跳转到订单详情页面
-  alert('跳转到订单详情页面 - 功能待开发')
+  window.location.hash = '/order-details'
 }
 
 // 返回首页
 const goBackHome = () => {
-  // 这里需要路由跳转到首页
-  alert('返回首页 - 功能待开发')
+  // 跳转到首页
+  window.location.hash = '/'
 }
 </script>
 

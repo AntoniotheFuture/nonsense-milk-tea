@@ -5,21 +5,21 @@
         <CircleClose />
       </el-icon>
     </div>
-    <el-dialog v-model="dialogVisible" :before-close="handleClose">
+    <CommonDialog
+      v-model="dialogVisible"
+      title="广告提示"
+      :show-cancel="false"
+      confirm-text="好"
+      @confirm="handleDialogClose"
+    >
       <span>广告很精彩，还有{{ adCount }}秒，请耐心看完~</span>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button type="primary" @click="dialogVisible = false">
-            好
-          </el-button>
-        </div>
-      </template>
-    </el-dialog>
+    </CommonDialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, defineEmits } from 'vue'
+import CommonDialog from './CommonDialog.vue'
 const emit = defineEmits(['adEnd', 'adClick'])
 
 const visible = ref(false)
@@ -28,6 +28,7 @@ const adImgUrl = ref('')
 const stopAble = ref(true)
 const countDown = ref(0)
 const dialogVisible = ref(false)
+const dialogCloseCount = ref(0) // 记录点击"好"按钮的次数
 let timer = null
 
 const computedStyle = computed(() => {
@@ -62,13 +63,26 @@ let startTimer = () => {
 }
 
 let close = () => {
-  if (stopAble.value || adCount.value <= 0) {
+  if (adCount.value <= 0) {
     visible.value = false
     clearInterval(timer)
     emit('adEnd')
     return
   }
   dialogVisible.value = true
+}
+
+let handleDialogClose = () => {
+  dialogCloseCount.value++
+  // 检查是否是开发环境，且点击次数达到2次
+  if (import.meta.env.DEV && dialogCloseCount.value >= 2) {
+    // 直接关闭广告
+    visible.value = false
+    clearInterval(timer)
+    emit('adEnd')
+  }
+  // 关闭对话框
+  dialogVisible.value = false
 }
 
 let handleClick = () => {

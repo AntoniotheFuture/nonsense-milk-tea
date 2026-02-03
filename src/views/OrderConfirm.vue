@@ -68,6 +68,16 @@
       <div class="total-amount">¥{{ totalAmount.toFixed(2) }}</div>
     </div>
     
+    <!-- 返回购物车按钮 -->
+    <el-button 
+      type="default" 
+      size="large" 
+      class="back-button"
+      @click="goBackToCart"
+    >
+      返回购物车
+    </el-button>
+    
     <!-- 付款按钮 -->
     <el-button 
       type="primary" 
@@ -87,6 +97,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { ElMessage } from 'element-plus'
 import { state, selfPickUpState, deliveryOrderState } from '../store/state.js'
 
 // 获取当前购物车商品
@@ -114,10 +125,28 @@ const getSweetnessLabel = (sweetness) => {
   return map[sweetness] || sweetness
 }
 
+// 返回购物车
+const goBackToCart = () => {
+  window.location.hash = '/cart'
+}
+
 // 跳转到付款页面
 const proceedToPayment = () => {
-  // 这里需要路由跳转，暂时用alert模拟
-  alert('跳转到付款页面 - 功能待开发')
+  // 验证购物车不为空
+  if (currentCartItems.value.length === 0) {
+    ElMessage.warning('购物车为空，无法结算')
+    return
+  }
+  
+  // 清空购物车
+  if (state.orderType === 'selfPickUp') {
+    selfPickUpState.orders = []
+  } else {
+    deliveryOrderState.orders = []
+  }
+  
+  // 跳转到付款成功页面
+  window.location.hash = '/payment'
 }
 </script>
 
@@ -232,6 +261,14 @@ h2 {
 .total-amount {
   font-size: 24px;
   font-weight: bold;
+  color: #ff6b6b;
+}
+
+.back-button {
+  width: 100%;
+  height: 45px;
+  margin-bottom: 10px;
+  border-color: #ff6b6b;
   color: #ff6b6b;
 }
 

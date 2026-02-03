@@ -46,19 +46,49 @@ onUnmounted(() => {
 })
 
 const gotoUser = () => {
-    emit('goToUser')
+    // 直接跳转到用户页面，而不是emit事件
+    window.location.hash = '#/custom'
 }
 
 const selfPickUp = () => {
    state.orderType = 'selfPickUp'
-    emit('goToOrder')
+    // 使用hash导航跳转到点单页面
+    window.location.hash = '#/order'
 }
 
 const deliveryOrder = () => {
     state.orderType = 'deliveryOrder'
-    emit('goToOrder')
+    // 使用hash导航跳转到点单页面
+    window.location.hash = '#/order'
 }
 
+// 广告图片生成函数
+const getAdImage = (index) => {
+  const adPrompts = [
+    'milk tea advertisement with colorful bubbles and fruits',
+    'coffee shop promotion with cozy atmosphere',
+    'fresh fruit juice ad with vibrant colors',
+    'summer drink promotion with ice cubes and mint',
+    'tea house advertisement with traditional Chinese style'
+  ]
+  return `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent(adPrompts[index - 1])}&image_size=landscape_16_9`
+}
+
+// 广告点击事件
+const adClick = () => {
+  window.open('https://www.example.com/advertisement', '_blank')
+}
+
+// 轮播图图片生成函数
+const getCarouselImage = (index) => {
+  const carouselPrompts = [
+    'milk tea shop interior with cozy atmosphere',
+    'colorful bubble tea with fruits on top',
+    'modern cafe with people enjoying drinks',
+    'summer beverage promotion with ice and mint'
+  ]
+  return `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=${encodeURIComponent(carouselPrompts[index])}&image_size=landscape_16_9`
+}
 
 </script>
 
@@ -66,41 +96,46 @@ const deliveryOrder = () => {
     <div class="home">
         <!-- 顶部用户头像和欢迎语 -->
         <div class="userWelcome">
-            <el-avatar :size="40" icon="el-icon-user-solid" @click="gotoUser"></el-avatar>
-            <span>
+            <el-avatar :size="40" icon="User" @click="gotoUser" />
+            <span class="welcome-text">
                 欢迎，
                 <el-link v-if="!state.isLogin" type="primary" href="#/login">{{ $t('goLogin') }}</el-link>
                 <span v-else>{{ state.userInfo.username }}</span>
             </span>
         </div>
         <!-- element 轮播广告 -->
-        <el-carousel height="150px" indicator-position="outside">
-            <el-carousel-item v-for="item in 4" :key="item">
-                <img :src="`/src/assets/ads/ad${item}.jpg`" style="width: 100%; height: 100%; object-fit: cover;" />
+        <el-carousel height="150px" indicator-position="outside" style="width: 100%;">
+            <el-carousel-item v-for="(item, index) in 4" :key="index">
+                <img :src="getCarouselImage(index)" style="width: 100%; height: 100%; object-fit: cover;" />
             </el-carousel-item>
         </el-carousel>
         <!-- 选择到店自取或者外卖点单 -->
         <div class="orderOptions">
             <el-card shadow="hover" class="optionCard" @click="selfPickUp">
-                <el-icon>
-                    <Shop />
-                </el-icon>
-                <div>到店自取</div>
+                <div class="option-content">
+                    <el-icon class="option-icon">
+                        <Shop />
+                    </el-icon>
+                    <span class="option-text">到店自取</span>
+                </div>
             </el-card>
             <el-card shadow="hover" class="optionCard" @click="deliveryOrder">
-                <el-icon>
-                    <Goods />
-                </el-icon>
-                <div>外卖点单</div>
+                <div class="option-content">
+                    <el-icon class="option-icon">
+                        <Goods />
+                    </el-icon>
+                    <span class="option-text">外卖点单</span>
+                </div>
             </el-card>
         </div>
         <!-- 巨幅广告列表 -->
-        <div class="bigAds" style="margin-top: 20px;">
-            <el-image
-                v-for="adIndex in 3"
+        <div class="bigAds" style="margin-top: 20px; width: 100%;">
+            <img
+                v-for="adIndex in 5"
                 :key="adIndex"
-                :src="`/src/assets/ads/big-ad${adIndex}.jpg`"
-                style="width: 100%; height: 120px; margin-bottom: 15px; object-fit: cover;"
+                :src="getAdImage(adIndex)"
+                style="width: 100%; height: 120px; margin-bottom: 15px; object-fit: cover; display: block; border-radius: 8px;"
+                @click="adClick"
             />
         </div>
     </div>
@@ -108,35 +143,128 @@ const deliveryOrder = () => {
 
 <style lang="less" scoped>
 .home {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: #fff;
-    border-top: 1px solid #ddd;
+    padding: 20px;
+    min-height: 100vh;
+    background-color: #f5f5f5;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-}
-.orderOptions {
-    margin-top: 20px;
-    display: flex;
-    justify-content: space-around;
-    .optionCard {
-        width: 45%;
-        text-align: center;
-        cursor: pointer;
+    gap: 20px;
+    overflow-y: auto;
+    width: 100%;
+    box-sizing: border-box;
+    padding-bottom: 80px; /* 为底部导航留出足够空间 */
+    
+    /* 确保滚动条可见但不影响布局 */
+    scrollbar-width: thin;
+    scrollbar-color: #ccc #f5f5f5;
+    
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+        background: #f5f5f5;
+        border-radius: 3px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+        background-color: #ccc;
+        border-radius: 3px;
     }
 }
+
+.userWelcome {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    justify-content: space-between;
+    padding: 15px 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    
+    .welcome-text {
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    .el-avatar {
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        
+        &:hover {
+            transform: scale(1.1);
+        }
+    }
+}
+
+.orderOptions {
+    width: 100%;
+    display: flex;
+    gap: 15px;
+    margin: 10px 0;
+    
+    .optionCard {
+        flex: 1;
+        text-align: center;
+        cursor: pointer;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        
+        &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        
+        .option-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            padding: 30px 20px;
+        }
+        
+        .option-icon {
+            font-size: 32px;
+            color: #ff6b6b;
+        }
+        
+        .option-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+    }
+}
+
 .bigAds {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 15px;
     width: 100%;
-    gap: 10px;
+    margin-top: 10px;
+    
+    img {
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        
+        &:hover {
+            transform: scale(1.02);
+        }
+    }
 }
 </style>

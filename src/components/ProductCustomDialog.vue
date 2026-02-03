@@ -1,11 +1,12 @@
 <template>
   <el-dialog
     v-model="visible"
-    :title="product.label"
+    :title="product?.label || '商品详情'"
     width="90%"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
     @close="handleClose"
+    class="custom-dialog"
   >
     <!-- 高度不一致的轮播图（地狱级体验：轮播时页面跳动） -->
     <div class="inconsistent-carousel" style="margin-bottom: 20px; overflow: hidden;">
@@ -26,28 +27,46 @@
     
     <!-- 商品基本信息 -->
     <div class="product-info" style="margin-bottom: 20px;">
-      <p>{{ product.description || '美味的奶茶，快来定制吧！' }}</p>
+      <p>{{ product?.description || '美味的奶茶，快来定制吧！' }}</p>
     </div>
     
-    <!-- 甜度选择（不一致单位增加认知负担） -->
-    <el-form-item label="甜度选择">
-      <el-radio-group v-model="selectedSweetness" size="large">
-        <el-radio label="zero">Zero糖</el-radio>
-        <el-radio label="25">25%糖</el-radio>
-        <el-radio label="50">半糖</el-radio>
-        <el-radio label="100">百分百糖</el-radio>
-      </el-radio-group>
-    </el-form-item>
+    <!-- 甜度选择 -->
+    <div class="form-section">
+      <h4 class="form-section-title">甜度选择</h4>
+      <div class="sweetness-options">
+        <div 
+          v-for="option in sweetnessOptions" 
+          :key="option.value"
+          class="sweetness-option"
+          :class="{ active: selectedSweetness === option.value }"
+          @click="selectedSweetness = option.value"
+        >
+          {{ option.label }}
+        </div>
+      </div>
+    </div>
     
     <!-- 数量选择 -->
-    <el-form-item label="数量">
-      <el-input-number 
-        v-model="quantity" 
-        :min="1" 
-        :max="99"
-        size="large"
-      />
-    </el-form-item>
+    <div class="form-section">
+      <h4 class="form-section-title">数量</h4>
+      <div class="quantity-control">
+        <button 
+          class="quantity-btn"
+          @click="decreaseQuantity"
+          :disabled="quantity <= 1"
+        >
+          -
+        </button>
+        <span class="quantity-value">{{ quantity }}</span>
+        <button 
+          class="quantity-btn"
+          @click="increaseQuantity"
+          :disabled="quantity >= 99"
+        >
+          +
+        </button>
+      </div>
+    </div>
     
     <!-- 珍珠定制（仅珍珠奶茶显示） -->
     <div v-if="isPearlMilkTea" class="pearl-custom-section">
@@ -89,23 +108,17 @@
             </el-select>
           </el-form-item>
           
-          <!-- 颜色选择 -->
+          <!-- 颜色选择（RGB选择器） -->
           <el-form-item :label="`珍珠${index + 1}颜色`" style="margin: 10px 0;">
-            <el-select 
+            <el-color-picker 
               v-model="pearl.color" 
-              placeholder="请选择颜色" 
+              show-alpha
               size="large"
               style="width: 100%;"
-              :required="true"
-            >
-              <el-option label="经典黑色" value="black" />
-              <el-option label="活力红色" value="red" />
-              <el-option label="清新绿色" value="green" />
-              <el-option label="梦幻紫色" value="purple" />
-              <el-option label="温暖棕色" value="brown" />
-              <el-option label="亮眼黄色" value="yellow" />
-              <el-option label="纯净白色" value="white" />
-            </el-select>
+            />
+            <div style="margin-top: 5px; font-size: 12px; color: #666;">
+              当前颜色: {{ pearl.color || '未选择' }}
+            </div>
           </el-form-item>
         </div>
       </div>
@@ -125,6 +138,7 @@
           @click="handleConfirm" 
           size="large"
           :loading="confirmLoading"
+          style="background-color: #ff6b6b; border-color: #ff6b6b;"
         >
           加入购物车
         </el-button>
@@ -157,14 +171,35 @@ const visible = computed({
 })
 
 // 轮播图相关
-const carouselImages = ref([
-  '/src/assets/products/milktea2.jpg',
-  '/src/assets/products/milktea1.jpg',
-  '/src/assets/products/coffee1.jpg',
-  '/src/assets/products/juice1.jpg'
-])
+const carouselImages = ref([])
 const currentImageIndex = ref(0)
-const inconsistentHeights = ref([120, 180, 100, 200]) // 不一致的高度
+const inconsistentHeights = ref([]) // 不一致的高度
+
+// 监听product变化，更新轮播图
+watch(() => props.product, (newProduct) => {
+  if (newProduct && newProduct.carouselImages && newProduct.carouselImages.length > 0) {
+    carouselImages.value = newProduct.carouselImages
+    // 为每张图片生成随机高度（保持地狱级体验）
+    inconsistentHeights.value = newProduct.carouselImages.map(() => 100 + Math.floor(Math.random() * 150))
+  } else {
+    // 默认图片
+    carouselImages.value = [
+      'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20milk%20tea%20product%20image&image_size=landscape_16_9',
+      'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=default%20beverage%20product%20image&image_size=landscape_16_9'
+    ]
+    inconsistentHeights.value = [150, 180]
+  }
+  currentImageIndex.value = 0
+}, { immediate: true })
+
+// 甜度选项
+const sweetnessOptions = ref([
+  { value: 'zero', label: '无糖' },
+  { value: '25', label: '25%糖' },
+  { value: '50', label: '半糖' },
+  { value: '75', label: '75%糖' },
+  { value: '100', label: '全糖' }
+])
 
 // 商品定制选项
 const selectedSweetness = ref('50') // 默认半糖
@@ -172,12 +207,25 @@ const quantity = ref(1)
 const pearlCount = ref(3) // 默认3颗珍珠
 const pearlOptions = ref([])
 
+// 数量控制方法
+const decreaseQuantity = () => {
+  if (quantity.value > 1) {
+    quantity.value--
+  }
+}
+
+const increaseQuantity = () => {
+  if (quantity.value < 99) {
+    quantity.value++
+  }
+}
+
 // 确认加载状态
 const confirmLoading = ref(false)
 
 // 判断是否是珍珠奶茶
 const isPearlMilkTea = computed(() => {
-  return props.product.label && props.product.label.includes('珍珠')
+  return props.product && props.product.label && props.product.label.includes('珍珠')
 })
 
 // 生成珍珠选项
@@ -236,7 +284,7 @@ const handleConfirm = async () => {
     emit('confirm', customData)
     confirmLoading.value = false
     handleClose()
-  }, 1000)
+  }, 500)
 }
 
 // 组件卸载时清理
@@ -274,5 +322,146 @@ watch(() => visible.value, (newVal) => {
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* 表单样式 */
+.form-section {
+  margin-bottom: 25px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+}
+
+.form-section-title {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 甜度选择样式 */
+.sweetness-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  overflow-x: hidden;
+}
+
+.sweetness-option {
+  width: auto;
+  padding: 6px 16px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 11px;
+  margin-right: 8px;
+  
+  &:last-child {
+    margin-right: 0;
+  }
+  
+  &:hover {
+    border-color: #ff6b6b;
+    transform: translateY(-1px);
+  }
+  
+  &.active {
+    background-color: #ff6b6b;
+    color: #fff;
+    border-color: #ff6b6b;
+  }
+}
+
+/* 数量选择样式 */
+.quantity-control {
+  display: flex;
+  align-items: center;
+  max-width: 120px;
+}
+
+.quantity-btn {
+  width: 28px;
+  height: 28px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &:hover:not(:disabled) {
+    background-color: #ff6b6b;
+    color: #fff;
+    border-color: #ff6b6b;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.quantity-value {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 12px;
+  min-width: 35px;
+}
+
+/* 珍珠定制样式优化 */
+.pearl-custom-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px dashed #ff6b6b;
+}
+
+.pearl-option-item {
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  padding: 15px !important;
+  margin: 10px 0 !important;
+  background-color: #f9f9f9;
+}
+
+.pearl-option-item h5 {
+  margin: 0 0 15px 0 !important;
+  font-size: 14px !important;
+  color: #666 !important;
+}
+/* 弹窗内部滚动样式 */
+.custom-dialog {
+  .el-dialog__body {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 20px;
+    
+    /* 自定义滚动条样式 */
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #ff6b6b;
+      border-radius: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb:hover {
+      background: #ff5252;
+    }
+  }
 }
 </style>

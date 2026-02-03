@@ -1,6 +1,6 @@
 <template>
-  <div class="nav-button" :class="{ active: active }" @click="emit('click')">
-    <el-icon :size="20" :color="color">
+  <div class="nav-button" :class="{ active: active }" @click="handleClick">
+    <el-icon :size="20" color="#000">
       <slot name="el-icon"></slot>
     </el-icon>
     <span class="label">{{ label }}</span>
@@ -8,22 +8,22 @@
 </template>
 
 <script setup>
-const emit = defineEmits(['adEnd'])
+const emit = defineEmits(['click'])
 
 defineProps({
   label: {
     type: String,
     required: true
   },
-  color: {
-    type: String,
-    default: '#000'
-  },
   active: {
     type: Boolean,
     default: false
   }
 })
+
+const handleClick = () => {
+  emit('click')
+}
 </script>
 
 <style scoped lang="less">
@@ -33,15 +33,17 @@ defineProps({
   align-items: center;
   justify-content: center;
   padding: 10px;
+  cursor: pointer;
   &.active {
     .label {
-      color: aqua;
+      color: #ff6b6b;
+      font-weight: bold;
     }
   }
 }
 .label {
   margin-top: 4px;
   font-size: 12px;
-  color: #333;
+  color: #000;
 }
 </style>
