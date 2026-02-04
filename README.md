@@ -1,5 +1,131 @@
-# Vue 3 + Vite
+# 五彩珍珠奶茶点单系统
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## 项目描述
+这是一个基于 Vue 3 + Vite 开发的奶茶点单系统，提供了完整的点单、购物车、结算、支付和订单详情功能。系统支持外卖配送和到店自取两种模式，具有美观的界面设计和流畅的用户体验。
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## 功能特性
+
+### 核心功能
+- ✅ 首页展示和商品浏览
+- ✅ 商品分类和筛选
+- ✅ 商品详情和定制选项
+- ✅ 购物车管理
+- ✅ 订单确认和结算
+- ✅ 支付流程模拟
+- ✅ 订单详情查看
+- ✅ 地址管理和编辑
+- ✅ 用户登录界面
+
+### 特色功能
+- 🎨 响应式布局，适配不同设备
+- 📱 商品图片和文字左右排列，优化视觉体验
+- 🔄 商品类别和列表滚动同步
+- 💰 智能费用计算（商品总价、打包费、配送费）
+- 🎁 平台活动优惠券支持
+- 📦 自取订单取餐码生成
+- 🚚 配送订单快递员信息和进度模拟
+- 🔒 本地存储广告展示状态，避免重复打扰
+- 📝 完整的国际化支持（中文/英文）
+
+## 技术栈
+
+### 前端框架
+- Vue 3 (Composition API + Script Setup)
+- Vite 7.2.4
+- Element Plus
+- Vue I18n
+
+### 样式
+- Less
+- CSS Flexbox/Grid
+- Element Plus 主题
+
+### 构建工具
+- Vite 构建系统
+- GitHub Actions CI/CD
+
+### 其他
+- 本地存储 (localStorage)
+- 哈希路由 (hash-based routing)
+- CSS 动画和过渡效果
+
+## 项目结构
+
+```
+src/
+├── views/            # 页面组件
+│   ├── Index.vue     # 首页/点单页
+│   ├── Login.vue     # 登录页
+│   ├── Cart.vue      # 购物车页
+│   ├── OrderConfirm.vue  # 订单确认页
+│   ├── Payment.vue   # 支付成功页
+│   ├── OrderDetails.vue  # 订单详情页
+│   └── AddressEdit.vue   # 地址编辑页
+├── components/       # 公共组件
+│   ├── CommonDialog.vue  # 公共弹框
+│   └── ProductCustomDialog.vue  # 商品定制弹框
+├── i18n/             # 国际化文件
+│   ├── zh.js         # 中文翻译
+│   └── en.js         # 英文翻译
+├── App.vue           # 根组件
+└── main.js           # 入口文件
+```
+
+## 安装和运行
+
+### 环境要求
+- Node.js 20.0+
+- npm 9.0+
+
+### 安装依赖
+```bash
+npm install
+```
+
+### 开发模式运行
+```bash
+npm run dev
+```
+
+项目将在 `http://localhost:3000` 启动。
+
+### 生产环境构建
+```bash
+npm run build
+```
+
+构建产物将生成在 `dist` 目录中。
+
+### 预览构建结果
+```bash
+npm run preview
+```
+
+## CI/CD 配置
+
+项目配置了 GitHub Actions 自动构建流程，当代码推送到 `master` 分支或创建 Pull Request 时，会自动执行以下步骤：
+
+1. 检出代码
+2. 设置 Node.js 环境
+3. 安装依赖
+4. 构建项目
+5. 上传构建产物
+
+## 注意事项
+
+1. **构建警告**：构建过程中可能会出现 chunk 大小警告，这是正常的，不影响项目运行。
+2. **浏览器兼容性**：建议使用现代浏览器访问，如 Chrome、Firefox、Safari 等。
+3. **本地存储**：系统使用本地存储保存部分状态，如广告展示记录。
+4. **支付模拟**：支付流程为模拟实现，实际项目中需要对接真实支付接口。
+
+## 许可证
+
+本项目仅供学习和参考使用。
+
+## 更新记录
+
+- 2026-02-05: 修复 GitHub Actions 构建错误，更新 Node.js 版本要求
+- 2026-02-04: 添加平台活动优惠券功能，优化订单详情页
+- 2026-02-03: 实现自取订单取餐码和配送订单进度功能
+- 2026-02-02: 优化界面布局，修复滚动问题
+- 2026-02-01: 初始化项目，实现核心功能
