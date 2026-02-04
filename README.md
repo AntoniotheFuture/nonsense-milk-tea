@@ -103,6 +103,7 @@ npm run preview
 
 ## CI/CD 配置
 
+### 自动构建流程
 项目配置了 GitHub Actions 自动构建流程，当代码推送到 `master` 分支或创建 Pull Request 时，会自动执行以下步骤：
 
 1. 检出代码
@@ -110,6 +111,25 @@ npm run preview
 3. 安装依赖
 4. 构建项目
 5. 上传构建产物
+
+### 手动部署流程
+项目还配置了手动触发的部署流程，用于将构建产物部署到 GitHub Pages：
+
+1. **触发方式**：在 GitHub 仓库的 Actions 标签页中手动触发
+2. **部署步骤**：
+   - 检出代码
+   - 设置 Node.js 环境
+   - 安装依赖
+   - 构建项目
+   - 配置 GitHub Pages
+   - 上传构建产物
+   - 部署到 GitHub Pages
+3. **部署地址**：`https://{username}.github.io/nonsense-milk-tea/`
+
+### 环境要求
+- Node.js 20.0+
+- npm 9.0+
+- GitHub Pages 权限已启用
 
 ## 注意事项
 
@@ -124,6 +144,7 @@ npm run preview
 
 ## 更新记录
 
+- 2026-02-05: 添加手动触发的 GitHub Pages 部署流程，更新 Vite 配置和项目文档
 - 2026-02-05: 修复 GitHub Actions 构建错误，更新 Node.js 版本要求
 - 2026-02-04: 添加平台活动优惠券功能，优化订单详情页
 - 2026-02-03: 实现自取订单取餐码和配送订单进度功能
