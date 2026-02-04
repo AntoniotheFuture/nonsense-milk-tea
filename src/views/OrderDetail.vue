@@ -12,7 +12,7 @@
 <script setup>
 import { ref } from 'vue'
 const orderId = ref('1234567890')
-const productName = ref('珍珠奶茶')
+const productName = ref('五彩珍珠奶茶')
 const quantity = ref(2)
 const totalPrice = ref(30.00)
 const orderTime = ref('2024-06-15 14:30:00')

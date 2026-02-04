@@ -2,10 +2,10 @@
   <div class="login-page">
     <!-- 场景图 -->
     <div class="scene-image" v-if="isLogin">
-      <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=milk%20tea%20shop%20interior%20with%20cozy%20atmosphere%20and%20warm%20lighting&image_size=landscape_16_9" alt="登录场景" />
+      <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cute%20cartoon%20style%20cat%20with%20milk%20tea%20transparent%20background&image_size=landscape_16_9" alt="登录场景" />
     </div>
     <div class="scene-image" v-else>
-      <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=customer%20enjoying%20milk%20tea%20with%20friends%20in%20a%20modern%20cafe&image_size=landscape_16_9" alt="注册场景" />
+      <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cute%20cartoon%20style%20cat%20drinking%20milk%20tea%20transparent%20background&image_size=landscape_16_9" alt="注册场景" />
     </div>
     
     <!-- 表单容器 -->
@@ -73,7 +73,7 @@ const loginRules = {
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 8, max: 20, message: '密码长度在8到20个字符', trigger: 'blur' }
+    { min: 20, message: '密码长度至少20个字符', trigger: 'blur' }
   ]
 }
 
@@ -84,7 +84,7 @@ const registerRules = {
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 8, max: 20, message: '密码长度在8到20个字符', trigger: 'blur' }
+    { min: 20, message: '密码长度至少20个字符', trigger: 'blur' }
   ]
 }
 
@@ -238,8 +238,9 @@ const register = () => {
 .primary-button {
   flex: 1;
   border-radius: 8px;
-  padding: 10px 0;
-  font-weight: 500;
+  padding: 15px 0;
+  font-size: 16px;
+  font-weight: 600;
   background-color: #ff6b6b;
   border: none;
   transition: all 0.3s ease;
@@ -253,14 +254,16 @@ const register = () => {
 .secondary-button {
   flex: 1;
   border-radius: 8px;
-  padding: 10px 0;
-  font-weight: 500;
+  padding: 15px 0;
+  font-size: 16px;
+  font-weight: 600;
   border: 1px solid #e0e0e0;
   transition: all 0.3s ease;
   
   &:hover {
     border-color: #ff6b6b;
     color: #ff6b6b;
+    transform: translateY(-2px);
   }
 }
 

@@ -2,6 +2,7 @@
 // 点单界面
 import { ref, onMounted, onUnmounted, computed, defineEmits, watch } from 'vue'
 import { ElLoading, ElMessage, ElNotification } from 'element-plus'
+import { Shop, Van, ArrowRight, Location, ShoppingCart, Delete, Close } from '@element-plus/icons-vue'
 import ProductClassification from '../components/ProductClassification.vue';
 import ProductCustomDialog from '../components/ProductCustomDialog.vue';
 import { state, selfPickUpState, deliveryOrderState } from '../store/state.js'
@@ -16,6 +17,13 @@ const originalProductList = [
         name: '奶茶',
         list: [
             {
+                id: 2,
+                label: '五彩珍珠奶茶',
+                price: 15.00,
+                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=pearl%20milk%20tea%20with%20tapioca%20pearls%20in%20a%20plastic%20cup&image_size=square_hd',
+                description: 'Q弹珍珠搭配香浓奶茶，经典之选'
+            },
+            {
                 id: 1,
                 label: '经典奶茶',
                 price: 12.00,
@@ -26,13 +34,6 @@ const originalProductList = [
                     'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=milk%20tea%20being%20poured%20into%20a%20cup&image_size=landscape_16_9',
                     'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=milk%20tea%20with%20boba%20pearls%20in%20a%20cup&image_size=landscape_16_9'
                 ]
-            },
-            {
-                id: 2,
-                label: '珍珠奶茶',
-                price: 15.00,
-                image: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=pearl%20milk%20tea%20with%20tapioca%20pearls%20in%20a%20plastic%20cup&image_size=square_hd',
-                description: 'Q弹珍珠搭配香浓奶茶，经典之选'
             },
             {
                 id: 3,
@@ -337,12 +338,12 @@ const classification = ref(classificationList[0]) // 默认选中第一个分类
 
 // 地址和门店相关
 const showStoreDrawer = ref(false)
-const currentStore = ref({ id: 1, name: '深南大道店', address: '南山区深南大道10000号', distance: '1.2km' })
+const currentStore = ref({ id: 1, name: '深南大道店', address: '南山区深南大道10000号', distance: '0.65海里' })
 const nearbyStores = ref([
-  { id: 1, name: '深南大道店', address: '南山区深南大道10000号', distance: '1.2km' },
-  { id: 2, name: '科技园店', address: '南山区科技园南区高新南一道', distance: '2.5km' },
-  { id: 3, name: '海岸城店', address: '南山区海岸城购物中心', distance: '3.1km' },
-  { id: 4, name: '深圳湾店', address: '南山区深圳湾体育中心', distance: '4.2km' }
+  { id: 1, name: '深南大道店', address: '南山区深南大道10000号', distance: '0.65海里' },
+  { id: 2, name: '科技园店', address: '南山区科技园南区高新南一道', distance: '1.35海里' },
+  { id: 3, name: '海岸城店', address: '南山区海岸城购物中心', distance: '1.67海里' },
+  { id: 4, name: '深圳湾店', address: '南山区深圳湾体育中心', distance: '2.27海里' }
 ])
 
 const currentAddress = ref({ name: '张三', phone: '13800138000', address: '南山区深南大道10000号', recipient: '张三' })
@@ -365,7 +366,7 @@ const selectClassification = (category) => {
   // 滚动到对应分类
   const element = document.getElementById(`category-${category}`)
   if (element) {
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    element.scrollIntoView({ behavior: 'auto', block: 'start' })
   }
 }
 
@@ -478,7 +479,7 @@ const selectStore = (store) => {
 
 // 去地址编辑页面
 const goToAddressEdit = () => {
-  window.location.hash = '#/addressEdit'
+  window.location.hash = '#/address-edit'
 }
 
 // 去购物车页面
@@ -560,7 +561,7 @@ onUnmounted(() => {
           :class="{ active: state.orderType === 'deliveryOrder' }"
           @click="state.orderType = 'deliveryOrder'"
         >
-          <el-icon><Truck /></el-icon>
+          <el-icon><Van /></el-icon>
           <span>外卖配送</span>
         </div>
     </div>
@@ -924,9 +925,11 @@ onUnmounted(() => {
   cursor: pointer;
   width: 100%;
   display: flex;
-  align-items: center;
+  flex-direction: row;
+  align-items: flex-start;
   gap: 15px;
   padding: 15px;
+  box-sizing: border-box;
   
   &:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -936,10 +939,32 @@ onUnmounted(() => {
 
 .product-image-container {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   overflow: hidden;
   border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.product-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-label {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-price {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ff6b6b;
+  margin-bottom: 12px;
 }
 
 .product-img {
@@ -953,34 +978,15 @@ onUnmounted(() => {
   }
 }
 
-.product-info {
-  flex: 1;
+.add-to-cart-btn {
+  display: inline-block;
+  width: auto;
+  background-color: #ff6b6b;
+  border-color: #ff6b6b;
   
-  .product-label {
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: #333;
-    cursor: pointer;
-  }
-  
-  .product-price {
-    font-size: 18px;
-    font-weight: 600;
-    color: #ff6b6b;
-    margin-bottom: 10px;
-  }
-  
-  .add-to-cart-btn {
-    display: inline-block;
-    width: auto;
-    background-color: #ff6b6b;
-    border-color: #ff6b6b;
-    
-    &:hover {
-      background-color: #ff5252;
-      border-color: #ff5252;
-    }
+  &:hover {
+    background-color: #ff5252;
+    border-color: #ff5252;
   }
 }
 
@@ -1138,6 +1144,7 @@ onUnmounted(() => {
   background: white;
   padding: 10px 20px;
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.1);

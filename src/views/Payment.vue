@@ -88,6 +88,11 @@ const goBackHome = () => {
   // 跳转到首页
   window.location.hash = '/'
 }
+
+// 付款成功后自动跳转到订单详情页
+setTimeout(() => {
+  window.location.hash = '/order-details'
+}, 3000)
 </script>
 
 <style scoped>
@@ -138,6 +143,7 @@ h2 {
   justify-content: space-between;
   padding: 10px 0;
   border-bottom: 1px solid #eee;
+  color: #333;
 }
 
 .info-item:last-child {

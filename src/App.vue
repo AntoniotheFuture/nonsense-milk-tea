@@ -64,6 +64,20 @@ const currentView = computed(() => {
 </template>
 
 <style lang="less">
+/* 全局样式重置，确保页面可以正常滚动 */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: #f5f5f5;
+}
+
 /* 全局提示弹窗样式，使其更符合消费场景 */
 
 /* 修改ElMessage的样式 */

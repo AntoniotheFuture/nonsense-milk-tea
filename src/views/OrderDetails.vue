@@ -8,20 +8,26 @@
       <span>排队中...</span>
     </div>
     <div class="order-status" v-else>
-      <el-icon><Truck /></el-icon>
+      <el-icon><Van /></el-icon>
       <span>配送中...</span>
     </div>
     
-    <!-- 排队号/配送信息 -->
+    <!-- 取餐码/配送信息 -->
     <div class="queue-info" v-if="state.orderType === 'selfPickUp'">
-      <div class="queue-number">您的排队号: #{{ queueNumber }}</div>
+      <div class="pickup-code">您的取餐码: #{{ pickupCode }}</div>
       <div class="estimated-time">预计等待时间: {{ estimatedTime }}分钟</div>
-      <div class="current-serving">当前服务: #{{ currentServing }}</div>
+      <div class="store-info">取餐门店: 深南大道店</div>
     </div>
     <div class="delivery-info" v-else>
-      <div class="delivery-status">骑手已接单</div>
+      <div class="delivery-status">{{ deliveryStatus }}</div>
       <div class="delivery-time">预计送达: {{ deliveryTime }}</div>
-      <div class="rider-info">骑手: 张师傅 (138****1234)</div>
+      <div class="rider-info">骑手: {{ riderInfo.name }} ({{ riderInfo.phone }})</div>
+      <div class="delivery-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+        </div>
+        <div class="progress-text">{{ progressText }}</div>
+      </div>
     </div>
     
     <!-- 商品清单 -->
@@ -59,20 +65,34 @@
     <div class="no-return-warning">
       ❗ 离开此页面后将无法再次查看订单状态！
     </div>
+    
+    <!-- 返回首页按钮 -->
+    <el-button 
+      type="default" 
+      size="large" 
+      class="back-home-button"
+      @click="goBackHome"
+    >
+      返回首页
+    </el-button>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { Timer, Van } from '@element-plus/icons-vue'
 import { state, selfPickUpState, deliveryOrderState } from '../store/state.js'
 
 // 模拟排队信息
-const queueNumber = ref(0)
-const currentServing = ref(0)
 const estimatedTime = ref(0)
+const pickupCode = ref('')
 
 // 模拟配送信息
 const deliveryTime = ref('')
+const deliveryStatus = ref('')
+const riderInfo = ref({ name: '', phone: '' })
+const progressPercent = ref(0)
+const progressText = ref('')
 
 // 获取当前购物车商品
 const currentCartItems = computed(() => {
@@ -101,17 +121,35 @@ const getSweetnessLabel = (sweetness) => {
 
 onMounted(() => {
   if (state.orderType === 'selfPickUp') {
-    // 生成随机排队信息
-    queueNumber.value = Math.floor(Math.random() * 50) + 10
-    currentServing.value = Math.floor(Math.random() * 10) + 1
+    // 生成随机取餐码
+    pickupCode.value = Math.floor(Math.random() * 9000) + 1000
     estimatedTime.value = Math.floor(Math.random() * 15) + 10
   } else {
     // 生成配送时间
     const now = new Date()
     now.setMinutes(now.getMinutes() + 30 + Math.floor(Math.random() * 20))
     deliveryTime.value = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    
+    // 生成骑手信息
+    const riderNames = ['张师傅', '李师傅', '王师傅', '刘师傅', '陈师傅']
+    riderInfo.value.name = riderNames[Math.floor(Math.random() * riderNames.length)]
+    riderInfo.value.phone = '138****' + Math.floor(Math.random() * 10000)
+    
+    // 生成配送状态和进度
+    const statuses = ['骑手已接单', '商家已出餐', '骑手已取餐', '配送中', '即将送达']
+    const randomStatus = Math.floor(Math.random() * statuses.length)
+    deliveryStatus.value = statuses[randomStatus]
+    
+    // 根据状态设置进度
+    progressPercent.value = (randomStatus + 1) * 20
+    progressText.value = statuses[randomStatus]
   }
 })
+
+// 返回首页
+const goBackHome = () => {
+  window.location.hash = '/'
+}
 </script>
 
 <style scoped>
@@ -150,11 +188,11 @@ h2 {
   text-align: center;
 }
 
-.queue-number {
-  font-size: 24px;
+.pickup-code {
+  font-size: 28px;
   font-weight: bold;
   color: #ff6b6b;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .estimated-time, .delivery-time {
@@ -163,9 +201,39 @@ h2 {
   margin-bottom: 10px;
 }
 
-.current-serving, .rider-info, .delivery-status {
+.store-info, .rider-info, .delivery-status {
   color: #666;
   font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* 配送进度样式 */
+.delivery-progress {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dashed #ccc;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b6b, #ff4757);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
 }
 
 .order-items {
@@ -255,6 +323,22 @@ h2 {
   padding: 15px;
   border-radius: 8px;
   border-left: 4px solid #ff4757;
+}
+
+.back-home-button {
+  width: 100%;
+  height: 50px;
+  font-size: 16px;
+  border: 1px solid #dcdfe6;
+  color: #606266;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+  
+  &:hover {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+  }
 }
 
 @keyframes blink {

@@ -6,7 +6,7 @@ export const state = reactive({
         username: '',
         avatarUrl: '',
     },
-    orderType: 'selfPickUp', // 'selfPickUp' 或 'delivery'
+    orderType: 'selfPickUp', // 'selfPickUp' 或 'deliveryOrder'
     // 注册当前用户，接收一个包含 username 和 avatarUrl 的对象
     registerUser(user = {}) {
         this.isLogin = true

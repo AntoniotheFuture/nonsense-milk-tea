@@ -68,8 +68,16 @@ onMounted(() => {
   // 监听hash变化
   window.addEventListener('hashchange', updatePageFromHash)
   
-  // 每次进来都强迫看10秒广告
-  adRef.value.start('/src/assets/img/ads/ad1.png', 10, false)
+  // 检查今天是否已经显示过广告
+  const today = new Date().toDateString()
+  const lastAdDate = localStorage.getItem('lastAdDate')
+  
+  if (lastAdDate !== today) {
+    // 今天还没显示过广告，显示广告
+    adRef.value.start('/src/assets/img/ads/ad1.png', 10, false)
+    // 记录今天的日期
+    localStorage.setItem('lastAdDate', today)
+  }
 })
 
 let adEnd = () => {

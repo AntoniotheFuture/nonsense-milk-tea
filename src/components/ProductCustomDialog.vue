@@ -7,7 +7,9 @@
     :close-on-press-escape="false"
     @close="handleClose"
     class="custom-dialog"
+    :max-height="'80vh'"
   >
+    <div class="dialog-content-wrapper">
     <!-- 高度不一致的轮播图（地狱级体验：轮播时页面跳动） -->
     <div class="inconsistent-carousel" style="margin-bottom: 20px; overflow: hidden;">
       <div 
@@ -32,17 +34,46 @@
     
     <!-- 甜度选择 -->
     <div class="form-section">
-      <h4 class="form-section-title">甜度选择</h4>
+      <h4 class="form-section-title">甜度</h4>
       <div class="sweetness-options">
-        <div 
-          v-for="option in sweetnessOptions" 
+        <button
+          v-for="option in sweetnessOptions"
           :key="option.value"
-          class="sweetness-option"
-          :class="{ active: selectedSweetness === option.value }"
+          :class="['sweetness-option', { active: selectedSweetness === option.value }]"
           @click="selectedSweetness = option.value"
         >
           {{ option.label }}
-        </div>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 冰量选择 -->
+    <div class="form-section">
+      <h4 class="form-section-title">冰量</h4>
+      <div class="ice-options">
+        <button
+          v-for="option in iceOptions"
+          :key="option.value"
+          :class="['ice-option', { active: selectedIce === option.value }]"
+          @click="selectedIce = option.value"
+        >
+          {{ option.label }}
+        </button>
+      </div>
+    </div>
+    
+    <!-- 杯型选择 -->
+    <div v-if="isCupSizeSupported" class="form-section">
+      <h4 class="form-section-title">杯型</h4>
+      <div class="cup-size-options">
+        <button
+          v-for="option in cupSizeOptions"
+          :key="option.value"
+          :class="['cup-size-option', { active: selectedCupSize === option.value }]"
+          @click="selectedCupSize = option.value"
+        >
+          {{ option.label }}
+        </button>
       </div>
     </div>
     
@@ -53,7 +84,6 @@
         <button 
           class="quantity-btn"
           @click="decreaseQuantity"
-          :disabled="quantity <= 1"
         >
           -
         </button>
@@ -75,19 +105,19 @@
           v-model="pearlCount" 
           :min="1" 
           :max="50"
-          size="large"
+          size="small"
           @change="generatePearlOptions"
         />
       </el-form-item>
       
       <!-- 每颗珍珠的定制选项 -->
       <div v-if="pearlOptions.length > 0" class="pearl-options-list">
-        <h4 style="margin: 20px 0; color: #ff6b6b;">每颗珍珠都要定制！</h4>
+        <h4 style="margin: 15px 0; color: #ff6b6b; font-size: 16px;">每颗珍珠都要定制！</h4>
         <div 
           v-for="(pearl, index) in pearlOptions" 
           :key="index"
           class="pearl-option-item"
-          style="border: 2px solid #ff6b6b; padding: 15px; margin: 10px 0; border-radius: 8px;"
+          style="border: 1px solid #ff6b6b; padding: 8px; margin: 6px 0; border-radius: 6px;"
         >
           <h5>第 {{ index + 1 }} 颗珍珠</h5>
           
@@ -96,7 +126,7 @@
             <el-select 
               v-model="pearl.material" 
               placeholder="请选择材质" 
-              size="large"
+              size="small"
               style="width: 100%;"
               :required="true"
             >
@@ -113,7 +143,7 @@
             <el-color-picker 
               v-model="pearl.color" 
               show-alpha
-              size="large"
+              size="small"
               style="width: 100%;"
             />
             <div style="margin-top: 5px; font-size: 12px; color: #666;">
@@ -127,6 +157,7 @@
       <div v-if="pearlOptions.length > 0" class="required-warning" style="color: #ff4757; font-weight: bold; margin: 10px 0;">
         ⚠️ 每颗珍珠的材质和颜色都必须选择！
       </div>
+    </div>
     </div>
     
     <!-- 操作按钮 -->
@@ -203,15 +234,47 @@ const sweetnessOptions = ref([
 
 // 商品定制选项
 const selectedSweetness = ref('50') // 默认半糖
+const selectedIce = ref('normal') // 默认有冰
+const selectedCupSize = ref('500ml') // 默认500ml
 const quantity = ref(1)
 const pearlCount = ref(3) // 默认3颗珍珠
 const pearlOptions = ref([])
 
+// 杯型选项
+const cupSizeOptions = [
+  { value: '500ml', label: '500ml' },
+  { value: '700ml', label: '700ml' }
+]
+
+// 检查商品是否支持杯型选择
+const isCupSizeSupported = computed(() => {
+  // 为部分商品添加杯型选择功能
+  const cupSizeProducts = ['五彩珍珠奶茶', '经典奶茶', '美式咖啡', '橙汁']
+  return cupSizeProducts.includes(props.product.label)
+})
+
+// 冰量选项
+const iceOptions = [
+  { value: 'normal', label: '有冰' },
+  { value: 'no', label: '无冰' },
+  { value: 'much', label: '很多冰' },
+  { value: 'super', label: '超级多冰' }
+]
+
+// 获取冰量标签
+const getIceLabel = (ice) => {
+  const map = {
+    'normal': '有冰',
+    'no': '无冰',
+    'much': '很多冰',
+    'super': '超级多冰'
+  }
+  return map[ice] || ice
+}
+
 // 数量控制方法
 const decreaseQuantity = () => {
-  if (quantity.value > 1) {
-    quantity.value--
-  }
+  quantity.value--
 }
 
 const increaseQuantity = () => {
@@ -277,6 +340,8 @@ const handleConfirm = async () => {
   setTimeout(() => {
     const customData = {
       sweetness: selectedSweetness.value,
+      ice: selectedIce.value,
+      cupSize: isCupSizeSupported.value ? selectedCupSize.value : '500ml',
       quantity: quantity.value,
       pearls: isPearlMilkTea.value ? pearlOptions.value : null
     }
@@ -305,14 +370,15 @@ watch(() => visible.value, (newVal) => {
 }
 
 .pearl-custom-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 2px dashed #ff6b6b;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px dashed #ff6b6b;
 }
 
 .pearl-option-item h5 {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   color: #ff6b6b;
+  font-size: 14px;
 }
 
 .required-warning {
@@ -326,28 +392,32 @@ watch(() => visible.value, (newVal) => {
 
 /* 表单样式 */
 .form-section {
-  margin-bottom: 25px;
-  padding: 15px;
+  margin-bottom: 15px;
+  padding: 12px;
   background-color: #f9f9f9;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 .form-section-title {
-  margin: 0 0 15px 0;
-  font-size: 16px;
+  margin: 0 0 10px 0;
+  font-size: 14px;
   font-weight: 600;
   color: #333;
 }
 
 /* 甜度选择样式 */
-.sweetness-options {
+.sweetness-options,
+.ice-options,
+.cup-size-options {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
   overflow-x: hidden;
 }
 
-.sweetness-option {
+.sweetness-option,
+.ice-option,
+.cup-size-option {
   width: auto;
   padding: 6px 16px;
   background-color: #fff;
@@ -415,6 +485,31 @@ watch(() => visible.value, (newVal) => {
   font-weight: 600;
   padding: 0 12px;
   min-width: 35px;
+}
+
+/* 对话框内容包装器，实现内部滚动 */
+.dialog-content-wrapper {
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 10px;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #ff6b6b;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: #ff5252;
+  }
 }
 
 /* 珍珠定制样式优化 */

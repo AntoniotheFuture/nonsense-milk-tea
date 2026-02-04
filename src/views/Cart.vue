@@ -20,7 +20,7 @@
           <div class="item-info">
             <div class="item-name">{{ item.label }}</div>
             <div class="item-details">
-              甜度: {{ getSweetnessLabel(item.sweetness) }} · 数量: {{ item.quantity }}
+              甜度: {{ getSweetnessLabel(item.sweetness) }} · 冰量: {{ getIceLabel(item.ice) }} · 杯型: {{ item.cupSize || '500ml' }} · 数量: {{ item.quantity }}
             </div>
             <div v-if="item.pearls" class="pearl-details">
               珍珠: {{ item.pearls.length }}颗
@@ -41,32 +41,60 @@
       </div>
       
       <div class="cart-footer">
+        <div class="fee-section" v-if="state.orderType === 'deliveryOrder'">
+          <div class="fee-item">
+            <span>商品总价: </span>
+            <span>¥{{ productTotal.toFixed(2) }}</span>
+          </div>
+          <div class="fee-item">
+            <span>打包费: </span>
+            <span>¥{{ packingFee.toFixed(2) }}</span>
+          </div>
+          <div class="fee-item">
+            <span>配送费: </span>
+            <span>¥{{ deliveryFee.toFixed(2) }}</span>
+          </div>
+        </div>
         <div class="total-section">
           <span>总计: </span>
           <strong>¥{{ cartTotal.toFixed(2) }}</strong>
         </div>
-        <el-button 
-          type="primary" 
-          size="large" 
-          @click="checkout"
-          :disabled="cartItems.length === 0"
-          class="checkout-btn"
-        >
-          结算
-        </el-button>
+        <div class="checkout-section">
+          <el-button 
+            type="primary" 
+            size="large" 
+            @click="checkout"
+            :disabled="cartItems.length === 0"
+            class="checkout-btn"
+          >
+            结算
+          </el-button>
+        </div>
       </div>
     </div>
+    
+    <!-- 错误弹框 -->
+    <CommonDialog
+      v-model="errorDialogVisible"
+      title="错误"
+      :show-cancel="false"
+      :show-confirm="false"
+    >
+      <p>总价不能小于0，无法提交订单</p>
+    </CommonDialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import CommonDialog from '../components/CommonDialog.vue'
 import { state, selfPickUpState, deliveryOrderState } from '../store/state.js'
 
 const emit = defineEmits(['goToOrder'])
 
 const cartItems = ref([])
+const errorDialogVisible = ref(false)
 
 // 获取甜度标签
 const getSweetnessLabel = (sweetness) => {
@@ -79,6 +107,17 @@ const getSweetnessLabel = (sweetness) => {
   return map[sweetness] || sweetness
 }
 
+// 获取冰量标签
+const getIceLabel = (ice) => {
+  const map = {
+    'normal': '有冰',
+    'no': '无冰',
+    'much': '很多冰',
+    'super': '超级多冰'
+  }
+  return map[ice] || ice
+}
+
 // 更新购物车
 const updateCart = () => {
   if (state.orderType === 'selfPickUp') {
@@ -88,9 +127,24 @@ const updateCart = () => {
   }
 }
 
+// 计算商品总价
+const productTotal = computed(() => {
+  return cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
+})
+
+// 打包费
+const packingFee = computed(() => {
+  return state.orderType === 'deliveryOrder' ? 2.00 : 0
+})
+
+// 配送费
+const deliveryFee = computed(() => {
+  return state.orderType === 'deliveryOrder' ? 5.00 : 0
+})
+
 // 计算总价
 const cartTotal = computed(() => {
-  return cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
+  return productTotal.value + packingFee.value + deliveryFee.value
 })
 
 // 返回首页（因为没有真正的路由，回到首页）
@@ -129,6 +183,12 @@ const removeCartItem = (index) => {
 const checkout = () => {
   if (cartItems.value.length === 0) {
     ElMessage.warning('购物车为空，请先添加商品')
+    return
+  }
+  
+  // 检查总价是否小于0
+  if (cartTotal.value < 0) {
+    errorDialogVisible.value = true
     return
   }
   
@@ -235,18 +295,46 @@ onMounted(() => {
   padding: 20px;
   border-top: 1px solid #eee;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 15px;
   background: white;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
   z-index: 100;
   box-sizing: border-box;
 }
 
+.checkout-section {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 5px;
+}
+
 /* 为购物车内容添加底部间距，避免被fixed的footer遮挡 */
 .cart-items {
   padding: 0 15px;
   padding-bottom: 100px;
+}
+
+.fee-section {
+  width: 100%;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.fee-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.fee-item:last-child {
+  margin-bottom: 0;
 }
 
 .total-section {

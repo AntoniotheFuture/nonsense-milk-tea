@@ -36,6 +36,15 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  /* 禁止移动端下拉刷新 */
+  overscroll-behavior: none;
+  /* 禁止文本选择 */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* 禁止双击缩放 */
+  touch-action: manipulation;
 }
 
 h1 {
@@ -151,4 +160,75 @@ button:focus-visible {
 }
 .banner-item.active {
   display: block;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  /* 调整按钮大小 */
+  button {
+    font-size: 16px;
+    padding: 12px 20px;
+  }
+  
+  /* 调整输入框大小 */
+  input, select, textarea {
+    font-size: 16px;
+    padding: 10px;
+  }
+  
+  /* 调整容器宽度 */
+  .container, .form-container, .cart-content, .order-content {
+    width: 100%;
+    margin: 0;
+    padding: 10px;
+  }
+  
+  /* 调整商品卡片大小 */
+  .product-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  /* 调整图片大小 */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* 调整标题大小 */
+  h1 {
+    font-size: 2em;
+  }
+  
+  h2 {
+    font-size: 1.5em;
+  }
+  
+  /* 调整页面内边距 */
+  .login-page, .home-page, .cart-page, .custom-page, .order-page {
+    padding: 10px;
+  }
+  
+  /* 调整订单页面布局 */
+  .order-layout {
+    flex-direction: column;
+  }
+  
+  .category-selector, .product-panel {
+    width: 100%;
+  }
+  
+  /* 调整购物车底部栏 */
+  .cart-bottom-bar {
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+  }
+}
+
+/* 禁止长按菜单 */
+img, button, input {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }

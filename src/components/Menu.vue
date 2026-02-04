@@ -18,16 +18,16 @@ const productList = ref([
         name: '奶茶',
         list: [
             {
+                id: 2,
+                label: '五彩珍珠奶茶',
+                price: 15.00,
+                image: '/src/assets/products/milktea2.jpg'
+            },
+            {
                 id: 1,
                 label: '经典奶茶',
                 price: 12.00,
                 image: '/src/assets/products/milktea1.jpg'
-            },
-            {
-                id: 2,
-                label: '珍珠奶茶',
-                price: 15.00,
-                image: '/src/assets/products/milktea2.jpg'
             }
         ]
     },

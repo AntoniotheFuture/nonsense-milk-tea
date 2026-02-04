@@ -1,6 +1,23 @@
 <template>
   <div class="order-confirm-page">
-    <h2>订单确认</h2>
+    <div class="header">
+      <el-button 
+        type="text" 
+        class="back-button" 
+        @click="goBack"
+      >
+        <el-icon><ArrowLeft /></el-icon>
+        <span>返回</span>
+      </el-button>
+      <h2>订单确认</h2>
+    </div>
+    
+    <!-- 付款loading界面 -->
+    <div v-if="isLoading" class="loading-overlay">
+      <div class="loading-content">
+        <el-loading :text="'正在付款...'" type="spinner" />
+      </div>
+    </div>
     
     <!-- 订单类型信息 -->
     <div class="order-type-info" v-if="state.orderType === 'selfPickUp'">
@@ -8,7 +25,7 @@
       <span>到店自取</span>
     </div>
     <div class="order-type-info" v-else>
-      <el-icon><Truck /></el-icon>
+      <el-icon><Van /></el-icon>
       <span>外卖配送</span>
     </div>
     
@@ -24,6 +41,8 @@
           <div class="item-name">{{ item.label }}</div>
           <div class="item-details">
             <span>甜度: {{ getSweetnessLabel(item.sweetness) }}</span>
+            <span>冰量: {{ getIceLabel(item.ice) }}</span>
+            <span>杯型: {{ item.cupSize || '500ml' }}</span>
             <span>数量: {{ item.quantity }}</span>
             <span v-if="item.pearls">珍珠: {{ item.pearls.length }}颗</span>
           </div>
@@ -54,39 +73,79 @@
       <h3>自取门店</h3>
       <div class="info-item">
         <el-icon><Location /></el-icon>
-        <span>南山区深南大道10000号</span>
+        <span>深南大道店 - 南山区深南大道10000号</span>
       </div>
       <div class="info-item">
         <el-icon><Timer /></el-icon>
         <span>预计等待时间: 15-20分钟</span>
+      </div>
+      <div class="info-item">
+        <el-icon><InfoFilled /></el-icon>
+        <span>距离: 0.65海里</span>
+      </div>
+    </div>
+    
+    <!-- 费用详情 -->
+    <div class="order-fees" v-if="state.orderType === 'deliveryOrder'">
+      <h3>费用详情</h3>
+      <div class="fee-item">
+        <span>商品总价: </span>
+        <span>¥{{ productTotal.toFixed(2) }}</span>
+      </div>
+      <div class="fee-item">
+        <span>打包费: </span>
+        <span>¥{{ packingFee.toFixed(2) }}</span>
+      </div>
+      <div class="fee-item">
+        <span>配送费: </span>
+        <span>¥{{ deliveryFee.toFixed(2) }}</span>
+      </div>
+      <div class="fee-item" v-if="totalAmount > 0">
+        <span>平台活动优惠券: </span>
+        <span class="discount">-¥{{ totalAmount.toFixed(2) }}</span>
+      </div>
+    </div>
+    <div class="order-fees" v-else>
+      <h3>费用详情</h3>
+      <div class="fee-item">
+        <span>商品总价: </span>
+        <span>¥{{ productTotal.toFixed(2) }}</span>
+      </div>
+      <div class="fee-item" v-if="totalAmount > 0">
+        <span>平台活动优惠券: </span>
+        <span class="discount">-¥{{ totalAmount.toFixed(2) }}</span>
       </div>
     </div>
     
     <!-- 总计 -->
     <div class="order-total">
       <div class="total-label">总计:</div>
-      <div class="total-amount">¥{{ totalAmount.toFixed(2) }}</div>
+      <div class="total-amount">¥{{ finalAmount.toFixed(2) }}</div>
     </div>
     
-    <!-- 返回购物车按钮 -->
-    <el-button 
-      type="default" 
-      size="large" 
-      class="back-button"
-      @click="goBackToCart"
-    >
-      返回购物车
-    </el-button>
-    
-    <!-- 付款按钮 -->
-    <el-button 
-      type="primary" 
-      size="large" 
-      class="pay-button"
-      @click="proceedToPayment"
-    >
-      立即付款
-    </el-button>
+    <!-- 底部按钮容器 -->
+    <div class="bottom-buttons">
+      <!-- 返回购物车按钮 -->
+      <el-button 
+        type="default" 
+        size="large" 
+        class="back-to-cart-button"
+        @click="goBackToCart"
+      >
+        返回购物车
+      </el-button>
+      
+      <!-- 付款按钮 -->
+      <el-button 
+        type="primary" 
+        size="large" 
+        class="pay-button"
+        @click="proceedToPayment"
+        style="background-color: #ff6b6b; border-color: #ff6b6b;"
+      >
+        立即付款
+      </el-button>
+    </div>
     
     <!-- 地狱级体验：不保存订单的警告 -->
     <div class="warning-note">
@@ -96,9 +155,26 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { ArrowLeft, Shop, Van, Location, User, Phone, Timer, InfoFilled } from '@element-plus/icons-vue'
 import { state, selfPickUpState, deliveryOrderState } from '../store/state.js'
+
+// 返回上一页
+const goBack = () => {
+  window.history.back()
+}
+
+// 自取门店信息
+const currentStore = ref({
+  id: 1,
+  name: '深南大道店',
+  address: '南山区深南大道10000号',
+  distance: '0.65海里'
+})
+
+// loading状态
+const isLoading = ref(false)
 
 // 获取当前购物车商品
 const currentCartItems = computed(() => {
@@ -109,9 +185,35 @@ const currentCartItems = computed(() => {
   }
 })
 
+// 计算商品总价
+const productTotal = computed(() => {
+  return currentCartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
+})
+
+// 打包费
+const packingFee = computed(() => {
+  return state.orderType === 'deliveryOrder' ? 2.00 : 0
+})
+
+// 配送费
+const deliveryFee = computed(() => {
+  return state.orderType === 'deliveryOrder' ? 5.00 : 0
+})
+
 // 计算总金额
 const totalAmount = computed(() => {
-  return currentCartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
+  return productTotal.value + packingFee.value + deliveryFee.value
+})
+
+// 计算最终支付金额
+const finalAmount = computed(() => {
+  if (totalAmount.value > 0) {
+    // 总价大于0时，优惠金额等于总价，最终支付0元
+    return 0
+  } else {
+    // 总价为负数时，保持原逻辑
+    return totalAmount.value
+  }
 })
 
 // 获取甜度标签
@@ -123,6 +225,17 @@ const getSweetnessLabel = (sweetness) => {
     '100': '百分百糖'
   }
   return map[sweetness] || sweetness
+}
+
+// 获取冰量标签
+const getIceLabel = (ice) => {
+  const map = {
+    'normal': '有冰',
+    'no': '无冰',
+    'much': '很多冰',
+    'super': '超级多冰'
+  }
+  return map[ice] || ice
 }
 
 // 返回购物车
@@ -138,6 +251,15 @@ const proceedToPayment = () => {
     return
   }
   
+  // 检查最终金额是否小于0
+  if (finalAmount.value < 0) {
+    ElMessage.error('总价不能小于0，无法提交订单')
+    return
+  }
+  
+  // 显示loading界面
+  isLoading.value = true
+  
   // 清空购物车
   if (state.orderType === 'selfPickUp') {
     selfPickUpState.orders = []
@@ -145,8 +267,11 @@ const proceedToPayment = () => {
     deliveryOrderState.orders = []
   }
   
-  // 跳转到付款成功页面
-  window.location.hash = '/payment'
+  // 延迟2秒后跳转到付款成功页面
+  setTimeout(() => {
+    // 跳转到付款成功页面
+    window.location.hash = '/payment'
+  }, 2000)
 }
 </script>
 
@@ -155,12 +280,33 @@ const proceedToPayment = () => {
   padding: 20px;
   background-color: #f5f5f5;
   min-height: 100vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-h2 {
-  text-align: center;
+.header {
+  display: flex;
+  align-items: center;
   margin-bottom: 30px;
+  position: relative;
+}
+
+.header .back-button {
+  margin-right: 20px;
   color: #333;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.header h2 {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  color: #333;
+  font-size: 20px;
 }
 
 .order-type-info {
@@ -239,6 +385,38 @@ h2 {
   gap: 10px;
   margin-bottom: 10px;
   padding: 5px 0;
+  color: #333;
+}
+
+.order-fees {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.order-fees h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+}
+
+.fee-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+.fee-item:last-child {
+  margin-bottom: 0;
+}
+
+.discount {
+  color: #ff4757;
+  font-weight: bold;
 }
 
 .order-total {
@@ -264,19 +442,40 @@ h2 {
   color: #ff6b6b;
 }
 
-.back-button {
+.bottom-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.back-to-cart-button {
   width: 100%;
   height: 45px;
-  margin-bottom: 10px;
   border-color: #ff6b6b;
   color: #ff6b6b;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    border-color: #ff5252;
+    color: #ff5252;
+  }
 }
 
 .pay-button {
   width: 100%;
   height: 50px;
   font-size: 18px;
-  margin-bottom: 20px;
+  background-color: #ff6b6b;
+  border-color: #ff6b6b;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background-color: #ff5252;
+    border-color: #ff5252;
+  }
 }
 
 .warning-note {
@@ -290,5 +489,23 @@ h2 {
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* loading overlay样式 */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  text-align: center;
 }
 </style>
