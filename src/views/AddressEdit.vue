@@ -73,11 +73,11 @@ const goBack = () => {
 
 // 地址表单
 const addressForm = ref({
-  name: '张三',
-  phone: '13800138000',
-  region: ['广东省', '深圳市', '南山区'],
-  detailAddress: '深南大道10000号',
-  zipCode: '518000'
+  name: '',
+  phone: '',
+  region: [],
+  detailAddress: '',
+  zipCode: ''
 })
 
 // 地址标签

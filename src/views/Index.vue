@@ -6,6 +6,7 @@ import Order from './Order.vue'
 import Cart from './Cart.vue'
 import Custom from './Custom.vue'
 import NavButton from '../components/NavButton.vue'
+import { state } from '../store/state.js'
 
 // 页面状态（使用hash路由）
 const currentPage = ref('Home')
@@ -50,7 +51,10 @@ const adRef = useTemplateRef('adRef')
 // 监听hash变化
 const updatePageFromHash = () => {
   const hash = window.location.hash
-  currentPage.value = hashToPage[hash] || 'Home'
+  // 只处理Index组件内部的hash路径，其他路径让App.vue处理
+  if (hashToPage[hash]) {
+    currentPage.value = hashToPage[hash]
+  }
 }
 
 // 监听页面变化，更新hash
@@ -65,7 +69,10 @@ onMounted(() => {
   // 初始化页面
   updatePageFromHash()
   
-  // 监听hash变化
+  // 首页导航后，将state.loaded设置为1
+  state.loaded = 1
+  
+  // 监听hash变化，更新页面
   window.addEventListener('hashchange', updatePageFromHash)
   
   // 检查今天是否已经显示过广告

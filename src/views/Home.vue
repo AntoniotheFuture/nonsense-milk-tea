@@ -76,7 +76,16 @@ const getAdImage = (index) => {
 
 // 广告点击事件
 const adClick = () => {
-  window.open('https://www.example.com/advertisement', '_blank')
+  // 跳转到点单页
+  window.location.hash = '#/order'
+  
+  // 延迟一段时间确保页面加载完成，然后触发五彩珍珠奶茶的弹窗
+  setTimeout(() => {
+    // 触发全局事件，让Order页面监听并弹出弹窗
+    window.dispatchEvent(new CustomEvent('openProductDialog', {
+      detail: { productId: 2 } // 五彩珍珠奶茶的ID
+    }))
+  }, 500)
 }
 
 // 轮播图图片生成函数
@@ -106,7 +115,11 @@ const getCarouselImage = (index) => {
         <!-- element 轮播广告 -->
         <el-carousel height="150px" indicator-position="outside" style="width: 100%;">
             <el-carousel-item v-for="(item, index) in 4" :key="index">
-                <img :src="getCarouselImage(index)" style="width: 100%; height: 100%; object-fit: cover;" />
+                <img 
+                  :src="getCarouselImage(index)" 
+                  style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" 
+                  @click="adClick"
+                />
             </el-carousel-item>
         </el-carousel>
         <!-- 选择到店自取或者外卖点单 -->

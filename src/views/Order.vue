@@ -339,14 +339,46 @@ const classification = ref(classificationList[0]) // 默认选中第一个分类
 // 地址和门店相关
 const showStoreDrawer = ref(false)
 const currentStore = ref({ id: 1, name: '深南大道店', address: '南山区深南大道10000号', distance: '0.65海里' })
-const nearbyStores = ref([
-  { id: 1, name: '深南大道店', address: '南山区深南大道10000号', distance: '0.65海里' },
-  { id: 2, name: '科技园店', address: '南山区科技园南区高新南一道', distance: '1.35海里' },
-  { id: 3, name: '海岸城店', address: '南山区海岸城购物中心', distance: '1.67海里' },
-  { id: 4, name: '深圳湾店', address: '南山区深圳湾体育中心', distance: '2.27海里' }
-])
+const nearbyStores = ref([])
 
-const currentAddress = ref({ name: '张三', phone: '13800138000', address: '南山区深南大道10000号', recipient: '张三' })
+// 生成随机店铺信息
+const generateRandomStores = () => {
+  const storeNames = ['幸福路店', '和平街店', '友谊大道店', '团结路店', '健康路店', '阳光街店', '星光大道店', '月光街店', '和风路店', '细雨街店']
+  const locations = ['幸福路', '和平街', '友谊大道', '团结路', '健康路', '阳光街', '星光大道', '月光街', '和风路', '细雨街']
+  const randomStores = []
+  
+  // 随机选择4-6个店铺
+  const storeCount = Math.floor(Math.random() * 3) + 4
+  const usedIndices = new Set()
+  
+  for (let i = 0; i < storeCount; i++) {
+    let randomIndex
+    do {
+      randomIndex = Math.floor(Math.random() * storeNames.length)
+    } while (usedIndices.has(randomIndex))
+    
+    usedIndices.add(randomIndex)
+    
+    // 生成随机地址细节和距离
+    const addressDetail = Math.floor(Math.random() * 9000) + 1000
+    const distance = (Math.random() * 3 + 0.5).toFixed(2)
+    
+    randomStores.push({
+      id: i + 1,
+      name: storeNames[randomIndex],
+      address: `${locations[randomIndex]}${addressDetail}号`,
+      distance: `${distance}海里`
+    })
+  }
+  
+  nearbyStores.value = randomStores
+  // 默认选择第一个店铺
+  if (randomStores.length > 0) {
+    currentStore.value = randomStores[0]
+  }
+}
+
+const currentAddress = ref({ name: '', phone: '', address: '', recipient: '' })
 
 // 商品定制对话框相关
 const customDialogVisible = ref(false)
@@ -515,6 +547,9 @@ watch(
 
 // 页面加载时从store获取购物车数据
 onMounted(() => {
+  // 生成随机店铺信息
+  generateRandomStores()
+  
   // 添加随机价格变动效果
   priceChangeTimer = setInterval(() => {
     productList.value.forEach(category => {
@@ -528,12 +563,50 @@ onMounted(() => {
   
   // 从store更新购物车
   updateCartFromStore()
+  
+  // 监听全局事件，打开商品定制弹窗
+  const handleOpenProductDialog = (event) => {
+    const { productId } = event.detail
+    
+    // 查找对应ID的商品
+    let targetProduct = null
+    for (const category of productList.value) {
+      for (const product of category.list) {
+        if (product.id === productId) {
+          targetProduct = product
+          break
+        }
+      }
+      if (targetProduct) break
+    }
+    
+    // 如果找到商品，打开定制弹窗
+    if (targetProduct) {
+      openCustomDialog(targetProduct)
+    }
+  }
+  
+  window.addEventListener('openProductDialog', handleOpenProductDialog)
+  
+    // 清理事件监听
+  const cleanup = () => {
+    window.removeEventListener('openProductDialog', handleOpenProductDialog)
+  }
+  
+  // 将清理函数添加到现有的 onUnmounted 中
+  window.__orderCleanup = cleanup
 })
 
 // 页面卸载时清除定时器
 onUnmounted(() => {
   if (priceChangeTimer) {
     clearInterval(priceChangeTimer)
+  }
+  
+  // 调用清理函数
+  if (window.__orderCleanup) {
+    window.__orderCleanup()
+    window.__orderCleanup = null
   }
 })
 </script>
@@ -628,6 +701,8 @@ onUnmounted(() => {
             >
               <div class="product-image-container" @click="openCustomDialog(product)">
                 <img :src="product.image" :alt="product.label" class="product-img">
+                <!-- 热销标签 -->
+                <div v-if="product.id === 2" class="hot-tag">热销</div>
               </div>
               <div class="product-info">
                 <div class="product-label" @click="openCustomDialog(product)">{{ product.label }}</div>
@@ -944,6 +1019,20 @@ onUnmounted(() => {
   overflow: hidden;
   border-radius: 6px;
   flex-shrink: 0;
+}
+
+.hot-tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #ff6b6b;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 0 0 8px 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .product-info {

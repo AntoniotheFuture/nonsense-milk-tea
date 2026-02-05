@@ -7,6 +7,7 @@ export const state = reactive({
         avatarUrl: '',
     },
     orderType: 'selfPickUp', // 'selfPickUp' 或 'deliveryOrder'
+    loaded: 0, // 页面加载状态，0为初始状态，1为已完成首页导航
     // 注册当前用户，接收一个包含 username 和 avatarUrl 的对象
     registerUser(user = {}) {
         this.isLogin = true

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Index from './views/Index.vue'
 import Login from './views/Login.vue'
 import OrderConfirm from './views/OrderConfirm.vue'
@@ -7,6 +7,7 @@ import Payment from './views/Payment.vue'
 import OrderDetails from './views/OrderDetails.vue'
 import Cart from './views/Cart.vue'
 import AddressEdit from './views/AddressEdit.vue'
+import { state } from './store/state.js'
 
 const routes = {
   '/': {
@@ -48,13 +49,38 @@ const routes = {
 }
 
 const currentPath = ref(window.location.hash)
-window.addEventListener('hashchange', () => {
-  currentPath.value = window.location.hash
-  document.title = routes[currentPath.value.slice(1) || '/']?.title || '五彩珍珠'
+
+// 初始化和监听hash变化
+onMounted(() => {
+  console.log('App mounted', location.hash)
+  // 检查state.loaded
+  if (window.location.hash !== '#/') {
+    // 如果不是1，重定向到首页
+    setTimeout(() => {
+      window.location.hash = '#/'
+      // currentPath.value = '#/'
+      // document.title = routes['/']?.title || '五彩珍珠'
+    }, 100)
+  } else {
+    // 如果是1，保持当前路径
+    currentPath.value = window.location.hash
+    const path = currentPath.value.slice(1) || '/'
+    document.title = routes[path]?.title || '五彩珍珠'
+  }
+  
+  // 监听hash变化
+  window.addEventListener('hashchange', () => {
+    // 检查state.loaded
+    currentPath.value = window.location.hash
+    const newPath = currentPath.value.slice(1) || '/'
+    document.title = routes[newPath]?.title || '五彩珍珠'
+  })
 })
 
 const currentView = computed(() => {
-  return routes[currentPath.value.slice(1) || '/']?.component || Index
+  const path = currentPath.value.slice(1) || '/'
+  const route = routes[path]
+  return route?.component || Index
 })
 </script>
 

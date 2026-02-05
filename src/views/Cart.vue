@@ -193,7 +193,7 @@ const checkout = () => {
   }
   
   // 使用hash路由跳转到订单确认页面
-  window.location.hash = '/order-confirm'
+  window.location.hash = '#/order-confirm'
 }
 
 onMounted(() => {
